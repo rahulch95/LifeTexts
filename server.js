@@ -2,7 +2,7 @@ var express = require('express'),
     app = express(),
     http = require('http'),
     server = http.createServer(app),
-    client = require('twilio')('ACebfb83673556ca04c192954bce8f979c', 'cec052a2b17af7719566f7680688b8ca');
+    client = require('twilio')('AC3ae44eef70072c95f5d52e57d39df1bc', 'dcd95a9a35f303ac6da486d994e130de');
 
 var twilio_number = '+16476910676';
 // ejs = require('ejs');
