@@ -5,6 +5,7 @@ var express = require('express'),
     str = require('string'),
     request = require('request'),
     json = require('json'),
+    unirest = require('unirest'),
     client = require('twilio')('AC3ae44eef70072c95f5d52e57d39df1bc', 'dcd95a9a35f303ac6da486d994e130de');
 
 var twilio_number = '+16476910676';
@@ -79,7 +80,7 @@ app.get('/sms/reply/*', function(req, res) {
 			});
 		
 	}
-	else if(body_message_parts[0] == 'weather') {
+	else if(body_message_parts[0].toLowerCase() == 'weather') {
         console.log('Weather');		
         console.log(body_message_parts);
         var cityname = body_message_parts[2];
@@ -103,19 +104,22 @@ app.get('/sms/reply/*', function(req, res) {
 				res.end(resp);
 			});
 	}
-	else if (str(body_message.toLowerCase()).startsWith('definition')) {  
+	else if (str(body_message.toLowerCase()).startsWith('define')) {  
 		console.log('Definition');
 		var resp = '';
-		var word = body_message_parts[2];
-		request('https://montanaflynn-dictionary.p.mashape.com/define?word=' + word,
-			function(err, res_req, body) {
-
-				var parsing = JSON.parse(body);
-				console.log(parsing);
-				var definition = parsing['definitions'][0]['text'];
-				var reply = word + ": " + definition;
-				resp = "<Response><Message>" + reply + "</Message></Response>"; 
-				res.end(resp); 
+		var reply = '';
+		var word = body_message_parts[1];
+		unirest.get("https://montanaflynn-dictionary.p.mashape.com/define?word="+word)
+			.header("X-Mashape-Key", "KamTtH7Q0ymshVl5xPDnbiSWKBbpp1Reh2TjsnM36vK1b3W5jE")
+			.header("Accept", "application/json")
+			.end(function (result) {
+				//console.log('definition', result.body);
+				var toparse = result.body;
+				for(var i = 0; i < min(toparse['definitions'].length, 3); i++) {
+					reply = reply + (i+1) + '. ' + toparse['definitions'][i]['text'] + '\n';
+				}
+				resp = "<Response><Message>" + reply + "</Message></Response>";
+				res.end(resp);
 			});
  	}
 	else {
