@@ -40,9 +40,9 @@ app.get('/', function(request, response) {
 });
 
 app.get('/sms/reply/', function(request, response) {
-	to_number = request.From;
-	received_message_body = request.Body;
-	client.sms.messages.create({
+	var to_number = request.From;
+	var received_message_body = request.Body;
+	var client.sms.messages.create({
 	    to:to_number,
 	    from:twilio_number,
 	    body:received_message_body;
