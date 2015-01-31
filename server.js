@@ -143,6 +143,24 @@ app.get('/sms/reply/*', function(req, res) {
 			);			
 		}
  	}
+ 	else if(body_message_parts[0].toLowerCase() == 'news') {
+		var top_count = parseInt(body_message_parts[1]);
+		var resp = '';
+		request('http://api.nytimes.com/svc/topstories/v1/home.json?api-key=7b58b7fc2899c1590247b5fdad94f5c6:0:71138579',
+			function(err, res_req, body) {
+				var top_stories_json = JSON.parse(body);
+				
+				var stories = top_stories_json['results'];
+				console.log(stories);
+				var reply = '';
+				for (var i = 0; i < top_count; i++) {
+					reply += i+1 + '. ' + stories[i]['title'].split('\u2019').join("'") +  '\n' + stories[i]['abstract'].split('\u2019').join("'") + '\n';
+				}
+				resp = "<Response><Message>" + reply + "</Message></Response>";
+			    res.end(resp);
+			}
+		);
+	}
 	else {
 		var resp = "<Response><Message>Command '" + body_message +"' not found</Message></Response>";
 		res.end(resp);
