@@ -42,10 +42,10 @@ app.get('/', function(request, response) {
 app.get('/sms/reply/', function(request, response) {
 	var to_number = request.From;
 	var received_message_body = request.Body;
-	var client.sms.messages.create({
+	client.sms.messages.create({
 	    to:to_number,
 	    from:twilio_number,
-	    body:received_message_body;
+	    body:received_message_body
 		}, function(error, message) {
 		    // The HTTP request to Twilio will run asynchronously. This callback
 		    // function will be called when a response is received from Twilio
