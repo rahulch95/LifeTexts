@@ -37,7 +37,11 @@ app.get('/sms/reply/*', function(req, res) {
 		request('http://api.nytimes.com/svc/topstories/v1/home.json?api-key=7b58b7fc2899c1590247b5fdad94f5c6:0:71138579',
 			function(err, res_req, body) {
 				var top_stories_json = JSON.parse(body);
+<<<<<<< HEAD
 				
+=======
+				console.log(body);
+>>>>>>> 141b48ebb1cd67ebbdb5cf61760121959446001b
 				var stories = top_stories_json['results'];
 				console.log(stories);
 				var reply = '';
