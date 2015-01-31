@@ -80,7 +80,7 @@ app.get('/sms/reply/*', function(req, res) {
 		
 	}
 	else if(str(body_message.toLowerCase()).startsWith('weather')) {
-                console.log('weather');
+                console.log('Weather');
                 var cityname = body_message.slice(2,3).join(',');
 		var cityloc = body_message.slice(3);
                 var resp = '';
@@ -105,6 +105,19 @@ app.get('/sms/reply/*', function(req, res) {
 				resp = "<Response><Message>" + reply + "</Message></Response>"; 
 				res.end(resp);
 			});
+	else if (str(body_message.toLowerCase()).startsWith('definition')) {  
+		console.log('Definition');
+		var resp = '';
+		var word = body_message_parts.slice(2);
+		request('https://montanaflynn-dictionary.p.mashape.com/define?word=' + word,
+			function(err, res-req, body) {
+				var parsing = JSON.parse(body);
+				var definition = parsing['definitions'][0]['text'];
+				var reply = word + ": " + definition;
+				resp = "<Response><Message>" + reply + "</Message></Response>"; 
+				res.end(resp); 
+			});
+ 	}
 	 else {
 		var resp = "<Response><Message>" + body_message +"</Message></Response>";
 		res.end(resp);
