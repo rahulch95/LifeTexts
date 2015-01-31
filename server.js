@@ -49,12 +49,12 @@ app.get('/sms/reply/*', function(req, res) {
 		body_message = req.query.Body;
 	}
 	var body_message_parts = body_message.split(" ");
-	
+
 	//Render the TwiML document using "toString"
 	res.writeHead(200, {
 	    'Content-Type':'text/xml'
 	});
-	if(str(body_message).startsWith('directions')) {
+	if(str(body_message).startsWith('directions') || str(body_message).startsWith('Directions')) {
 		console.log('directions');
 		var end_from_index = 3;
 		for (var i = 2; i < body_message_parts.length; i++) {
@@ -68,12 +68,11 @@ app.get('/sms/reply/*', function(req, res) {
 		var resp = '';
 		request('https://maps.googleapis.com/maps/api/directions/json?origin=' + from_place + '&destination=' + to_place,
 			function(err, res_req, body) {
-				console.log(body);
 				var direction_json = JSON.parse(body);
 				var steps = direction_json['routes'][0]['legs'][0]['steps'];
 				var reply = '';
 				for (var i = 0; i < steps.length; i++) {
-					reply += i+1 + '. ' + steps[i]['html_instructions'].split('<b>').join('').split('</b>').join('').split('\n').join() + " for " + steps[i]['duration']['text'] + ' (' + steps[i]['distance']['text'] + ')'+ '<br/>';
+					reply += i+1 + '. ' + steps[i]['html_instructions'].split('<b>').join('').split('</b>').join('').split('\n').join() + " for " + steps[i]['duration']['text'] + ' (' + steps[i]['distance']['text'] + ')'+ '\n';
 				}
 				resp = "<Response><Message>" + reply + "</Message></Response>";
 			    res.end(resp);
