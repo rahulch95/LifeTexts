@@ -43,13 +43,13 @@ app.get('/', function(req, res) {
 });
 
 app.get('/sms/reply/*', function(req, res) {
-	console.log(req.query);
+	console.log(req.query, 'abcbs');
 	var body_message = "could not find body";
 	if (req.query.Body) {
 		body_message = req.query.Body;
 	}
 	var body_message_parts = body_message.split(" ");
-
+	console.log(body_message, 'abc', body_message_parts);
 	//Render the TwiML document using "toString"
 	res.writeHead(200, {
 	    'Content-Type':'text/xml'
@@ -79,49 +79,56 @@ app.get('/sms/reply/*', function(req, res) {
 			});
 		
 	}
-	else if(str(body_message.toLowerCase()).startsWith('weather')) {
-                console.log('Weather');
-                var cityname = body_message.slice(2,3).join(',');
-		var cityloc = body_message.slice(3);
-                var resp = '';
-		request('http://api.openweathermap.org/data/2.5/weather?q=' + cityname + cityloc + '&units=metric', 
+	else if(body_message_parts[0] == 'weather') {
+        console.log('Weather');		
+        console.log(body_message_parts);
+        var cityname = body_message_parts[2];
+		var cityloc = body_message_parts[3];
+        var resp = '';
+        console.log('http://api.openweathermap.org/data/2.5/weather?q=' + cityname + ','+ cityloc + '&units=metric');
+		request('http://api.openweathermap.org/data/2.5/weather?q=' + cityname + ',' + cityloc + '&units=metric', 
 			function(err, res_req, body) {
+				console.log('body of weather', body);
 				var weather_details = JSON.parse(body);
-				var country = weather_details['list'][0]['sys']['country'];
-				var mintemp = weather_details['list'][0]['main']['temp_min'];
-				var temp = weather_details['list'][0]['main']['temp'];
-				var maxtemp = weather_details['list'][0]['main']['temp_max'];
-				var humidity = weather_details['list'][0]['main']['humidity'];
-				var windspeed = weather_details['list'][0]['wind']['speed'] + ', ' weather_details['list'][0]['wind']['deg'];
-				var description = weather_details['list'][0]['weather'][0]['main'] + ', ' + 
-							weather_details['list'][0]['weather'][0]['description'];
-				var reply = cityname + ', ' + cityloc + ', ' + country + '\n' +
-						'Current Temp    : ' + temp + '\n' +
-						'Description     : ' + description + '\n'
-						'Minimum         : ' + mintemp + '\n' + 
-						'Maximum         : ' + maxtemp + '\n' +
-						'Humidity        : ' + humidity + '\n' + 
-						'Speed/Direction : ' + windspeed + '\n';
+				var country = weather_details['sys']['country'];
+				var mintemp = weather_details['main']['temp_min'];
+				var temp = weather_details['main']['temp'];
+				var maxtemp = weather_details['main']['temp_max'];
+				var humidity = weather_details['main']['humidity'];
+				var windspeed = weather_details['wind']['speed'].toString() + ', ' + weather_details['wind']['deg'].toString();
+				var description = weather_details['weather'][0]['main'] + ', ' + 
+							weather_details['weather'][0]['description'];
+				var reply = cityname + ', ' + cityloc + ', ' + country + '\n' + 'Current Temp    : ' + temp + '\n' +'Description     : ' + description + '\n' + 'Minimum         : ' + mintemp + '\n' + 'Maximum         : ' + maxtemp + '\n' +'Humidity        : ' + humidity + '\n' + 	'Speed/Direction : ' + windspeed + '\n';
 				resp = "<Response><Message>" + reply + "</Message></Response>"; 
 				res.end(resp);
 			});
+	}
 	else if (str(body_message.toLowerCase()).startsWith('definition')) {  
 		console.log('Definition');
 		var resp = '';
-		var word = body_message_parts.slice(2);
+		var word = body_message_parts[2];
 		request('https://montanaflynn-dictionary.p.mashape.com/define?word=' + word,
-			function(err, res-req, body) {
+			function(err, res_req, body) {
+
 				var parsing = JSON.parse(body);
+				console.log(parsing);
 				var definition = parsing['definitions'][0]['text'];
 				var reply = word + ": " + definition;
 				resp = "<Response><Message>" + reply + "</Message></Response>"; 
 				res.end(resp); 
 			});
  	}
-	 else {
+	else {
 		var resp = "<Response><Message>" + body_message +"</Message></Response>";
 		res.end(resp);
 	}
+});
+
+app.get('*', function(req, res) {
+
+	 res.writeHead(200, {"Content-Type" : "text/html"});
+	 res.write("<body>404</body>");
+	 res.end();
 });
 
 app.listen(app.get('port'), function() {

@@ -66,6 +66,7 @@ app.get('/sms/reply/*', function(req, res) {
 		from_place = body_message_parts.slice(2, end_from_index).join('+');
 		to_place = body_message_parts.slice(end_from_index + 1).join('+');
 		var resp = '';
+		console.log('https://maps.googleapis.com/maps/api/directions/json?origin=' + from_place + '&destination=' + to_place);
 		request('https://maps.googleapis.com/maps/api/directions/json?origin=' + from_place + '&destination=' + to_place,
 			function(err, res_req, body) {
 				var direction_json = JSON.parse(body);
