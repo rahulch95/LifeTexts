@@ -42,27 +42,12 @@ app.get('/', function(request, response) {
 app.get('/sms/reply/', function(request, response) {
 	var to_number = request.From;
 	var received_message_body = request.Body;
-	client.sms.messages.create({
-	    to:to_number,
-	    from:twilio_number,
-	    body:received_message_body
-		}, function(error, message) {
-		    // The HTTP request to Twilio will run asynchronously. This callback
-		    // function will be called when a response is received from Twilio
-		    // The "error" variable will contain error information, if any.
-		    // If the request was successful, this value will be "falsy"
-		    if (!error) {
-		        // The second argument to the callback will contain the information
-		        // sent back by Twilio for the request. In this case, it is the
-		        // information about the text messsage you just sent:
-		        console.log('Success! The SID for this SMS message is:');
-		        console.log(message.sid);
-		        console.log('Message sent on:');
-		        console.log(message.dateCreated);
-		    } else {
-		        console.log('Oops! There was an error.');
-		    }
-	});
+	var resp = "<Response><Message>" + received_message_body +"</Message></Response>";
+    //Render the TwiML document using "toString"
+    res.writeHead(200, {
+        'Content-Type':'text/xml'
+    });
+    res.end(resp);
 });
 
 app.listen(app.get('port'), function() {
