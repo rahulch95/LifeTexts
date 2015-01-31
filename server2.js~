@@ -115,13 +115,28 @@ app.get('/sms/reply/*', function(req, res) {
 			.end(function (result) {
 				//console.log('definition', result.body);
 				var toparse = result.body;
-				for(var i = 0; i < min(toparse['definitions'].length, 3); i++) {
+				for(var i = 0; i < Math.min(toparse['definitions'].length, 3); i++) {
 					reply = reply + (i+1) + '. ' + toparse['definitions'][i]['text'] + '\n';
 				}
 				resp = "<Response><Message>" + reply + "</Message></Response>";
 				res.end(resp);
 			});
  	}
+	else if (body_message_parts[0].toLowerCase() == 'nearby') {
+		console.log('Nearby');
+		var resp = '';
+		var reply;
+		var type = body_message_parts[1];
+		var keyword = body_message_parts[2];
+		request('https://maps.googleapis.com/maps/api/place/radarsearch/json?location=48.859294,2.347589&radius=5000&types=' + 
+type + '&keyword=' + keyword + 'key=AIzaSyDHqRqXuIj53W3n7_228jExe4ImVUkIVLo',
+			function(err, res_req, body) {
+				console.log(body);	
+				resp = "<Response><Message>" + reply + "</Message></Response>";
+			    res.end(resp);
+			});
+			
+	}
 	else {
 		var resp = "<Response><Message>" + body_message +"</Message></Response>";
 		res.end(resp);

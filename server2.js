@@ -44,13 +44,11 @@ app.get('/', function(req, res) {
 });
 
 app.get('/sms/reply/*', function(req, res) {
-	console.log(req.query, 'abcbs');
 	var body_message = "could not find body";
 	if (req.query.Body) {
 		body_message = req.query.Body;
 	}
 	var body_message_parts = body_message.split(" ");
-	console.log(body_message, 'abc', body_message_parts);
 	//Render the TwiML document using "toString"
 	res.writeHead(200, {
 	    'Content-Type':'text/xml'
@@ -122,6 +120,21 @@ app.get('/sms/reply/*', function(req, res) {
 				res.end(resp);
 			});
  	}
+	else if (body_message_parts[0].toLowerCase() == 'nearby') {
+		console.log('Nearby');
+		var resp = '';
+		var reply;
+		var type = body_message_parts[1];
+		var keyword = body_message_parts[2];
+		request('https://maps.googleapis.com/maps/api/place/radarsearch/json?location=48.859294,2.347589&radius=5000&types=' + 
+type + '&keyword=' + keyword + 'key=AIzaSyDHqRqXuIj53W3n7_228jExe4ImVUkIVLo',
+			function(err, res_req, body) {
+				console.log(body);	
+				resp = "<Response><Message>" + reply + "</Message></Response>";
+			    res.end(resp);
+			});
+			
+	}
 	else {
 		var resp = "<Response><Message>" + body_message +"</Message></Response>";
 		res.end(resp);
