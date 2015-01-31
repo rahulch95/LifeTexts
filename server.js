@@ -3,6 +3,8 @@ var express = require('express'),
     http = require('http'),
     server = http.createServer(app),
     str = require('string'),
+    request = require('request'),
+    json = require('json'),
     client = require('twilio')('AC3ae44eef70072c95f5d52e57d39df1bc', 'dcd95a9a35f303ac6da486d994e130de');
 
 var twilio_number = '+16476910676';
@@ -33,25 +35,53 @@ app.set('port', (process.env.PORT || 5000));
 //     }
 // });
 
-app.get('/', function(request, response) {
+app.get('/', function(req, res) {
 	 
-	 response.writeHead(200, {"Content-Type" : "text/html"});
-	 response.write("<body>Hi</body>");
-	 response.end();
+	 res.writeHead(200, {"Content-Type" : "text/html"});
+	 res.write("<body>Hi</body>");
+	 res.end();
 });
 
-app.get('/sms/reply/*', function(request, response) {
-	console.log(request.query);
+app.get('/sms/reply/*', function(req, res) {
+	console.log(req.query);
 	var body_message = "could not find body";
-	if (request.query.Body) {
-		body_message = request.query.Body;
+	if (req.query.Body) {
+		body_message = req.query.Body;
 	}
-	var resp = "<Response><Message>" + body_message +"</Message></Response>";
+	var body_message_parts = body_message.split(" ");
+	if(str(body_message).startsWith('directions')) {
+		console.log('directions');
+		var end_from_index = 3;
+		for (var i = 2; i < body_message_parts.length; i++) {
+			if (body_message_parts[i] == 'to') {
+				end_from_index = i;
+				break;
+			};
+		};
+		from_place = body_message_parts.slice(2, end_from_index).join('+');
+		to_place = body_message_parts.slice(end_from_index + 1).join('+');
+		var resp = '';
+		request('https://maps.googleapis.com/maps/api/directions/json?origin=' + from_place + '&destination=' + to_place,
+			function(err, res_req, body) {
+				console.log(body);
+				var direction_json = JSON.parse(body);
+				var steps = direction_json['routes'][0]['legs'][0]['steps'];
+				var reply = '';
+				for (var i = 0; i < steps.length; i++) {
+					reply += i+1 + '. ' + steps[i]['html_instructions'].split('<b>').join('').split('</b>').join('').split('\n').join() + " for " + steps[i]['duration']['text'] + ' (' + steps[i]['distance']['text'] + ')'+ '<br/>';
+				}
+				resp = "<Response><Message>" + reply + "</Message></Response>";
+			    res.end(resp);
+			});
+		
+	} else {
+		var resp = "<Response><Message>" + body_message +"</Message></Response>";
+		res.end(resp);
+	}
     //Render the TwiML document using "toString"
-    response.writeHead(200, {
+    res.writeHead(200, {
         'Content-Type':'text/xml'
     });
-    response.end(resp);
 });
 
 app.listen(app.get('port'), function() {
