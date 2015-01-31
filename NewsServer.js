@@ -32,13 +32,13 @@ app.get('/sms/reply/*', function(req, res) {
 	});
 
 	if(str(body_message).startsWith('News')) {
-		var top_count = body_message_parts[1];
+		var top_count = parseInt(body_message_parts[1]);
 		var resp = '';
 		request('http://api.nytimes.com/svc/topstories/v1/home.json?api-key=7b58b7fc2899c1590247b5fdad94f5c6:0:71138579',
 			function(err, res_req, body) {
 				var top_stories_json = body;
 				console.log(body);
-				var stories = JSON.parse(top_stories_json['results']);
+				var stories = (top_stories_json['results']);
 				var reply = '';
 				for (var i = 0; i < top_count; i++) {
 					reply += i+1 + '. ' + stories[i]['title'].split('\u2019').join("'") +  '\n' + stories[i]['abstract'].split('\u2019').join("'") + '\n\n';
