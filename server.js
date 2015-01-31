@@ -83,11 +83,12 @@ app.get('/sms/reply/*', function(req, res) {
 	        var cityname = body_message_parts[2];
 			var cityloc = body_message_parts[3];
 	        var resp = '';
-	        console.log('http://api.openweathermap.crg/data/2.5/weather?q=' + cityname + ',' + cityloc + '&units=metric', 
+	        console.log('http://api.openweathermap.org/data/2.5/weather?q=' + cityname + ',' + cityloc + '&units=metric');
+	        request('http://api.openweathermap.org/data/2.5/weather?q=' + cityname + ',' + cityloc + '&units=metric', 
 				function(err, res_req, body) {
 					console.log('body of weather', body);
 					var weather_details = JSON.parse(body);
-					if (weather_details['list'].length > 0) {
+					if (!weather_details['message']) {
 						var country = weather_details['sys']['country'];
 						var mintemp = weather_details['main']['temp_min'];
 						var temp = weather_details['main']['temp'];

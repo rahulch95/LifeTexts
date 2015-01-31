@@ -38,7 +38,7 @@ app.get('/sms/reply/*', function(req, res) {
 			function(err, res_req, body) {
 				var top_stories_json = body;
 				console.log(body);
-				var stories = (top_stories_json['results']);
+				var stories = top_stories_json['results'];
 				var reply = '';
 				for (var i = 0; i < top_count; i++) {
 					reply += i+1 + '. ' + stories[i]['title'].split('\u2019').join("'") +  '\n' + stories[i]['abstract'].split('\u2019').join("'") + '\n\n';
