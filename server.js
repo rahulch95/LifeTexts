@@ -49,6 +49,11 @@ app.get('/sms/reply/*', function(req, res) {
 		body_message = req.query.Body;
 	}
 	var body_message_parts = body_message.split(" ");
+	
+	//Render the TwiML document using "toString"
+	res.writeHead(200, {
+	    'Content-Type':'text/xml'
+	});
 	if(str(body_message).startsWith('directions')) {
 		console.log('directions');
 		var end_from_index = 3;
@@ -78,10 +83,6 @@ app.get('/sms/reply/*', function(req, res) {
 		var resp = "<Response><Message>" + body_message +"</Message></Response>";
 		res.end(resp);
 	}
-    //Render the TwiML document using "toString"
-    res.writeHead(200, {
-        'Content-Type':'text/xml'
-    });
 });
 
 app.listen(app.get('port'), function() {
