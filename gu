@@ -1,0 +1,6 @@
+#!/bin/bash
+#Script to add to git repository
+
+git add $1
+git commit
+git push
