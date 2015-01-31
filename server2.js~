@@ -79,7 +79,7 @@ app.get('/sms/reply/*', function(req, res) {
 			});
 		
 	}
-	else if(body_message_parts[0].toLowerCase() == 'weather') {
+	else if(body_message_parts[0] == 'weather') {
         console.log('Weather');		
         console.log(body_message_parts);
         var cityname = body_message_parts[2];
