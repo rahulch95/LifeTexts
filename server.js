@@ -2,6 +2,7 @@ var express = require('express'),
     app = express(),
     http = require('http'),
     server = http.createServer(app),
+    str = require('string'),
     client = require('twilio')('AC3ae44eef70072c95f5d52e57d39df1bc', 'dcd95a9a35f303ac6da486d994e130de');
 
 var twilio_number = '+16476910676';
@@ -39,10 +40,13 @@ app.get('/', function(request, response) {
 	 response.end();
 });
 
-app.get('/sms/reply/', function(request, response) {
-	var to_number = request.From;
-	var received_message_body = request.Body;
-	var resp = "<Response><Message>" + received_message_body +"</Message></Response>";
+app.get('/sms/reply/*', function(request, response) {
+	console.log(request.query);
+	var body_message = "could not find body";
+	if (request.query.Body) {
+		body_message = request.query.Body;
+	}
+	var resp = "<Response><Message>" + body_message +"</Message></Response>";
     //Render the TwiML document using "toString"
     response.writeHead(200, {
         'Content-Type':'text/xml'
