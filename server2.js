@@ -107,6 +107,7 @@ app.get('/sms/reply/*', function(req, res) {
 		console.log('Definition');
 		var resp = '';
 		var word = body_message_parts[2];
+		var header = {"X-Mashape-Key", "<required>", "Accept": "application/json")
 		request('https://montanaflynn-dictionary.p.mashape.com/define?word=' + word,
 			function(err, res_req, body) {
 
