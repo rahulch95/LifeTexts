@@ -115,7 +115,7 @@ app.get('/sms/reply/*', function(req, res) {
 			.end(function (result) {
 				//console.log('definition', result.body);
 				var toparse = result.body;
-				for(var i = 0; i < Math.min(toparse['definitions'].length, 3); i++) {
+				for(var i = 0; i < min(toparse['definitions'].length, 3); i++) {
 					reply = reply + (i+1) + '. ' + toparse['definitions'][i]['text'] + '\n';
 				}
 				resp = "<Response><Message>" + reply + "</Message></Response>";
