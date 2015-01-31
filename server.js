@@ -44,10 +44,10 @@ app.get('/sms/reply/', function(request, response) {
 	var received_message_body = request.Body;
 	var resp = "<Response><Message>" + received_message_body +"</Message></Response>";
     //Render the TwiML document using "toString"
-    res.writeHead(200, {
+    response.writeHead(200, {
         'Content-Type':'text/xml'
     });
-    res.end(resp);
+    response.end(resp);
 });
 
 app.listen(app.get('port'), function() {
