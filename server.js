@@ -200,28 +200,34 @@ app.get('/sms/reply/*', function(req, res) {
 		var address = body_message_parts.slice(index1 + 1, index2);
 		var keyword = body_message_parts.slice(index2 + 2);
 		var lat;
-		var long;
+		var lng;
 		//console.log(address);
 		request('https://maps.googleapis.com/maps/api/geocode/json?address=' + address, 
 			function(err, res_req, body) {
 				//console.log(body);
 				var toparse = JSON.parse(body);
 				lat = toparse['results'][0]['geometry']['location']['lat'];
-				long = toparse['results'][0]['geometry']['location']['lng'];
+				lng = toparse['results'][0]['geometry']['location']['lng'];
 				//console.log(lat, long);
-				request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + lat + ',' + long + 					'&radius=1000&types=' + type + '&keyword=' + keyword + '&key=AIzaSyDewm58QznqMn6M4Bc8Lg1kyV3OjyN61F0', 
+				request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + lat + ',' + lng + '&radius=1000&types=' + type + '&keyword=' + keyword + '&key=AIzaSyDewm58QznqMn6M4Bc8Lg1kyV3OjyN61F0', 
 				function(err, res_req, body) {
 					//console.log(body);
 					var placeparse = JSON.parse(body);
-					var number = Math.min(3, placeparse['results'].length);
-					//console.log('The minimum is' + number);
-					for(var i = 0; i < number; i++) {
-						reply = reply + (i+1) + '. \n' + 'Name      : ' + placeparse['results'][i]['name']+'\n'+
-						'Location       : ' + placeparse['results'][i]['vicinity'] + '\n' +
-						'Open now?      : ' + placeparse['results'][i]['opening_hours']['open_now'] + '\n' + 							'Price level    : ' + placeparse['results'][i]['price_level'] + '\n';
+					if (placeparse['status'] == 'ZERO_RESULTS') {
+						resp = "<Response><Message>Invalid Keyword or no results found</Message></Response>";
+						res.end(resp);	
 					}
-				resp = "<Response><Message>" + reply + "</Message></Response>";
-				res.end(resp);	
+					else {
+						var number = Math.min(3, placeparse['results'].length);
+						//console.log('The minimum is' + number);
+						for(var i = 0; i < number; i++) {
+							reply = reply + (i+1) + '. \n' + 'Name      : ' + placeparse['results'][i]['name']+'\n'+
+							'Location       : ' + placeparse['results'][i]['vicinity'] + '\n' +
+							'Open now?      : ' + placeparse['results'][i]['opening_hours']['open_now'] + '\n' + 							'Price level    : ' + placeparse['results'][i]['price_level'] + '\n';
+						}
+					resp = "<Response><Message>" + reply + "</Message></Response>";
+					res.end(resp);	
+					}
 				});
 			});
 	}
