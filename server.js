@@ -6,7 +6,7 @@ var express = require('express'),
     request = require('request'),
     json = require('json'),
     unirest = require('unirest'),
-    client = require('twilio')('ACce62b8626f21bfa8a8f3856aeeab8b36', '3c378b5cc4a2554e6c70080e4eda7123');
+    client = require('twilio')(process.env.TWILIO_KEY, process.env.TWILIO_SECRET);
 //process.env.TWILIO_KEY, process.env.TWILIO_SECRET
 app.set('port', (process.env.PORT || 5000));
 
