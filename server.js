@@ -34,7 +34,7 @@ app.get('/sms/reply/*', function(req, res) {
 		var resp = "<Response><Message>" + reply + "</Message></Response>";
 		res.end(resp);
 	}
-	else if(str(body_message_parts[0]).toLowerCase() == 'directions' || str(body_message_parts[0]).toLowerCase() == 'direction') {
+	else if(str(body_message_parts[0]).toLowerCase() == 'directions') {
 		if (body_message_parts[1] != 'from' ||
 			body_message.toLowerCase().indexOf('to') == -1 ||
 			body_message.toLowerCase().indexOf('to') == 2 ||
@@ -46,6 +46,13 @@ app.get('/sms/reply/*', function(req, res) {
 		//console.log('directions');
 
 		var end_from_index = 3;
+		var mode_of_transport = 'transit';
+		if (body_message_parts[body_message_parts.length - 1] == 'walking' ||
+			body_message_parts[body_message_parts.length - 1] == 'transit' ||
+			body_message_parts[body_message_parts.length - 1] == 'driving') {
+			mode_of_transport = body_message_parts[body_message_parts.length - 1];
+			body_message_parts = body_message_parts.slice(0,body_message_parts.length - 1);
+		}
 		for (var i = 2; i < body_message_parts.length; i++) {
 			if (body_message_parts[i].toLowerCase() == 'to') {
 				end_from_index = i;
@@ -54,9 +61,10 @@ app.get('/sms/reply/*', function(req, res) {
 		};
 		from_place = body_message_parts.slice(2, end_from_index).join('+');
 		to_place = body_message_parts.slice(end_from_index + 1).join('+');
+
 		var resp = '';
 		//console.log('https://maps.googleapis.com/maps/api/directions/json?origin=' + from_place + '&destination=' + to_place);
-		request('https://maps.googleapis.com/maps/api/directions/json?origin=' + from_place + '&destination=' + to_place,
+		request('https://maps.googleapis.com/maps/api/directions/json?origin=' + from_place + '&destination=' + to_place + '&mode=' + mode_of_transport,
 			function(err, res_req, body) {
 				var direction_json = JSON.parse(body);
 				if(direction_json['status'] == 'NOT_FOUND') 
