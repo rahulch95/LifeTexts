@@ -6,7 +6,7 @@ var express = require('express'),
     request = require('request'),
     json = require('json'),
     unirest = require('unirest'),
-    client = require('twilio')(process.env.TWILIO_KEY, process.env.TWILIO_SECRET);
+    client = require('twilio')('ACce62b8626f21bfa8a8f3856aeeab8b36', '3c378b5cc4a2554e6c70080e4eda7123');
 //process.env.TWILIO_KEY, process.env.TWILIO_SECRET
 app.set('port', (process.env.PORT || 5000));
 
@@ -53,6 +53,7 @@ app.get('/sms/reply/*', function(req, res) {
 			mode_of_transport = body_message_parts[body_message_parts.length - 1];
 			body_message_parts = body_message_parts.slice(0,body_message_parts.length - 1);
 		}
+		console.log(body_message_parts);
 		for (var i = 2; i < body_message_parts.length; i++) {
 			if (body_message_parts[i].toLowerCase() == 'to') {
 				end_from_index = i;
@@ -63,24 +64,30 @@ app.get('/sms/reply/*', function(req, res) {
 		to_place = body_message_parts.slice(end_from_index + 1).join('+');
 
 		var resp = '';
-		//console.log('https://maps.googleapis.com/maps/api/directions/json?origin=' + from_place + '&destination=' + to_place);
+		console.log('https://maps.googleapis.com/maps/api/directions/json?origin=' + from_place + '&destination=' + to_place + '&mode=' + mode_of_transport);
 		request('https://maps.googleapis.com/maps/api/directions/json?origin=' + from_place + '&destination=' + to_place + '&mode=' + mode_of_transport,
 			function(err, res_req, body) {
 				var direction_json = JSON.parse(body);
-				if(direction_json['status'] == 'NOT_FOUND') 
-				{
-					reply = 'Origin/Destination not found';
-				} 
-				else 
-				{
-					var steps = direction_json['routes'][0]['legs'][0]['steps'];
-					var reply = '';
-					for (var i = 0; i < steps.length; i++) {
-						reply += i+1 + '. ' + steps[i]['html_instructions'].split('<b>').join('').split('</b>').join('').split('\n').join('').split('<div style="font-size:0.9em">').join('') + " for " + steps[i]['duration']['text'] + ' (' + steps[i]['distance']['text'] + ')'+ '\n';
-					}
+				if (direction_json['status'] == 'ZERO_RESULTS') {
+					resp = "<Response><Message>No directions found, change mode of transport and make sure you specify the right city.</Message></Response>";
+					res.end(resp);	
 				}
-				resp = "<Response><Message>" + reply + "</Message></Response>";
-			    res.end(resp);
+				else {
+					if(direction_json['status'] == 'NOT_FOUND') 
+					{
+						reply = 'Origin/Destination not found';
+					} 
+					else 
+					{
+						var steps = direction_json['routes'][0]['legs'][0]['steps'];
+						var reply = '';
+						for (var i = 0; i < steps.length; i++) {
+							reply += i+1 + '. ' + steps[i]['html_instructions'].split('<b>').join('').split('</b>').join('').split('\n').join('').split('<div style="font-size:0.9em">').join('') + " for " + steps[i]['duration']['text'] + ' (' + steps[i]['distance']['text'] + ')'+ '\n';
+						}
+					}
+					resp = "<Response><Message>" + reply + "</Message></Response>";
+				    res.end(resp);
+				}
 			});
 		
 	} 
