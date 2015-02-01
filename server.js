@@ -30,7 +30,7 @@ app.get('/sms/reply/*', function(req, res) {
 	    'Content-Type':'text/xml'
 	});
 	if(body_message_parts[0].toLowerCase() == 'help') {
-		var reply = "For directions, enter data in the format \"Directions from (Enter origin) to (Enter destination)\" \nFor Places, enter data in the format \"(type of) Places near (your location) with keyword (keyword)\" \nFor Weather, enter data in the format \"Weather at (name of city) (name of province/state/country)\" \nFor Stocks, enter data in the format \"Stock (4 letter stock name)\" \nFor news, enter data in the format \"News\" \nFor dictionary definitions of words, enter data in the format \"Define (your word)\" \n";
+		var reply = "For directions, enter data in the format \"Directions from (Enter origin) to (Enter destination)\" \n\nFor Places, enter data in the format \"(type of) Places near (your location) with keyword (keyword)\" \n\nFor Weather, enter data in the format \"Weather at (name of city) (name of province/state/country)\" \n\nFor Stocks, enter data in the format \"Stock (4 letter stock name)\" \n\nFor news, enter data in the format \"News (number of articles/search) (number of articles to search) (search keyword)\" \n\nFor dictionary definitions of words, enter data in the format \"Define (your word)\" \n";
 		var resp = "<Response><Message>" + reply + "</Message></Response>";
 		res.end(resp);
 	}
@@ -68,7 +68,7 @@ app.get('/sms/reply/*', function(req, res) {
 					var steps = direction_json['routes'][0]['legs'][0]['steps'];
 					var reply = '';
 					for (var i = 0; i < steps.length; i++) {
-						reply += i+1 + '. ' + steps[i]['html_instructions'].split('<b>').join('').split('</b>').join('').split('\n').join() + " for " + steps[i]['duration']['text'] + ' (' + steps[i]['distance']['text'] + ')'+ '\n';
+						reply += i+1 + '. ' + steps[i]['html_instructions'].split('<b>').join('').split('</b>').join('').split('\n').join('').split('<div style="font-size:0.9em">').join('') + " for " + steps[i]['duration']['text'] + ' (' + steps[i]['distance']['text'] + ')'+ '\n';
 					}
 				}
 				resp = "<Response><Message>" + reply + "</Message></Response>";
@@ -171,7 +171,7 @@ app.get('/sms/reply/*', function(req, res) {
 				res.end(resp);
 		});
 	}
-	else if (body_message_parts[1].toLowerCase() == 'places') { //_____ places near ______ with keyword ______
+	else if (body_message_parts.indexOf('places') == 1) { //_____ places near ______ with keyword ______
 		//console.log('Places');
 		var type = body_message_parts[0];
 		var index1, index2;
@@ -211,22 +211,72 @@ app.get('/sms/reply/*', function(req, res) {
 				});
 			});
 	}
- 	else if(body_message_parts[0].toLowerCase() == 'news') {
- 		var flag = 0;
-		var resp = '';
-		request('http://api.nytimes.com/svc/topstories/v1/home.json?api-key=7b58b7fc2899c1590247b5fdad94f5c6:0:71138579',
-			function(err, res_req, body) {
-				var top_stories_json = JSON.parse(body);
-				
-				var stories = top_stories_json['results'];
-				var reply = '';
-				for (var i = 0; i < 5; i++) {
-					reply += i+1 + '. ' + stories[i]['title'].split('\u2019').join("'") +  '\n' + stories[i]['abstract'].split('\u2019').join("'") + '\n';
+ 	else if(str(body_message_parts[0]).toLowerCase() == 'news') {
+		if(body_message_parts.length == 1) {
+			var resp = '';
+
+			request('http://api.nytimes.com/svc/topstories/v1/home.json?api-key=7b58b7fc2899c1590247b5fdad94f5c6:0:71138579',
+				function(err, res_req, body) {
+					var top_stories_json = JSON.parse(body);
+					var stories = top_stories_json['results'];
+					var reply = '';
+
+					for (var i = 0; i < 3; i++) {
+						reply += i+1 + '. ' + stories[i]['title'].split('\u2019').join("'") +  '\n' + stories[i]['abstract'].split('\u2019').join("'") + '\n';
+					}
+
+					resp = "<Response><Message>" + reply + "</Message></Response>";
+			    	res.end(resp);
 				}
-				resp = "<Response><Message>" + reply + "</Message></Response>";
-			    res.end(resp);
+			);	
+		}
+		else if(isNaN(body_message_parts[1]) != true) {
+			var top_count = parseInt(body_message_parts[1]);
+			var resp = '';
+
+			request('http://api.nytimes.com/svc/topstories/v1/home.json?api-key=7b58b7fc2899c1590247b5fdad94f5c6:0:71138579',
+				function(err, res_req, body) {
+					var top_stories_json = JSON.parse(body);
+					var stories = top_stories_json['results'];
+					var reply = '';
+
+					for (var i = 0; i < top_count; i++) {
+						reply += i+1 + '. ' + stories[i]['title'].split('\u2019').join("'") +  '\n' + stories[i]['abstract'].split('\u2019').join("'") + '\n';
+					}
+
+					resp = "<Response><Message>" + reply + "</Message></Response>";
+			    	res.end(resp);
+				}
+			);
+		}
+		else if(body_message_parts[1].toLowerCase() == 'search') {
+			var stories_count = parseInt(body_message_parts[2]);
+			var key_words = body_message_parts.slice(3);
+			var search_term = '';
+
+			for (i = 0; i < key_words.length; i++) {
+				search_term += key_words[i] + '+';
 			}
-		);
+
+			search_term = search_term.slice(0, search_term.length - 1);
+
+			var resp = '';
+
+			request('http://api.nytimes.com/svc/search/v2/articlesearch.json?q=' + search_term + '&fl=lead_paragraph,headline,pub_date&api-key=fdcac45a0d405a7487fbd422128cb413:0:71138579',
+				function(err, res_req, body) {
+					var results_json = JSON.parse(body);
+					var results = results_json['response']['docs'];
+					var reply = '';
+					//console.log(body);
+					for (var i = 0; i < stories_count; i++) {
+						reply+= i+1 + '. ' + results[i]['headline']['main'] + '\n' + results[i]['lead_paragraph'] + '\n';
+					}
+
+					resp = "<Response><Message>" + reply + "</Message></Response>";
+			    	res.end(resp);	
+				}
+			);
+		}
 	}
 	else {
 		var resp = "<Response><Message>Command '" + body_message +"' not found</Message></Response>";
