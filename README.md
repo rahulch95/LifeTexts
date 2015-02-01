@@ -3,7 +3,7 @@ LifeTexts
 ## What is LifeTexts?
 LifeTexts is a life saving text app when you don't have any data or wifi.
 If you get lost, need to check up on your stocks, want to know the weather out there or just need to find nearby places, say a bus stand or a chinese restaurant, we got you covered. 
-## How do I use TextShare?
+## How do I use LifeTexts?
 Just shoot a text to:
 ## +1(647)691-0707
 Don't forget the +1, it's important.
