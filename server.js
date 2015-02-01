@@ -49,7 +49,7 @@ app.get('/sms/reply/*', function(req, res) {
 		var mode_of_transport = 'transit';
 		if (body_message_parts[body_message_parts.length - 1] == 'walking' ||
 			body_message_parts[body_message_parts.length - 1] == 'transit' ||
-			body_message_parts[body_message_parts.length - 1] == 'driving') {
+			body_message_parts.indexOf('driving') != -1) {
 			mode_of_transport = body_message_parts[body_message_parts.length - 1];
 			body_message_parts = body_message_parts.slice(0,body_message_parts.length - 1);
 		}
