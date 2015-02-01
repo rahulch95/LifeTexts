@@ -71,7 +71,7 @@ app.get('/sms/reply/*', function(req, res) {
 					var reply = '';
 					console.log(body);
 					for (var i = 0; i < stories_count; i++) {
-						reply+= i+1 + '. ' + results[i]['headline']['main'] + '\n' + results[i]['lead_paragraph'] + '\n';
+						reply+= i+1 + '. ' + results[i]['headline']['main'] + '\n' + results[i]['pub_date'].slice(0, 10) + '\n' + results[i]['lead_paragraph'] + '\n';
 					}
 
 					resp = "<Response><Message>" + reply + "</Message></Response>";
