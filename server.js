@@ -179,7 +179,7 @@ app.get('/sms/reply/*', function(req, res) {
 	}
 	else if (body_message_parts.indexOf('places') == 1) { //_____ places near ______ with keyword ______
 		//console.log('Places');
-		var type = body_message_parts[0];
+		var type = body_message_parts[0].toLowerCase();
 		var index1, index2;
 		var reply = '';
 		var resp;
