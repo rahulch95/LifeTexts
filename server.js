@@ -149,6 +149,12 @@ app.get('/sms/reply/*', function(req, res) {
  	}
 	else if (body_message_parts[0].toLowerCase() == 'stock') {
 		//console.log('Stocks');	
+		if(body_message_parts.length != 2) {
+			resp = "<Response><Message>Incorrect usage, please try: Stock &lt;stock_name&gt;</Message></Response>";
+			res.end(resp);	
+		}
+		else
+		{
 		var name = body_message_parts[1];
 		var reply = '';
 		var resp;
@@ -169,7 +175,7 @@ app.get('/sms/reply/*', function(req, res) {
 					'Close           : ' + result.body[0]['close'] + '\n';
 			resp = "<Response><Message>" + reply + "</Message></Response>";
 				res.end(resp);
-		});
+		});}
 	}
 	else if (body_message_parts.indexOf('places') == 1) { //_____ places near ______ with keyword ______
 		//console.log('Places');
@@ -279,7 +285,7 @@ app.get('/sms/reply/*', function(req, res) {
 		}
 	}
 	else {
-		var resp = "<Response><Message>Command '" + body_message +"' not found</Message></Response>";
+		var resp = "<Response><Message>Command '" + body_message +"' not found. Type 'Help me' for help.</Message></Response>";
 		res.end(resp);
 	}
 });

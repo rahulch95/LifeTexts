@@ -6,9 +6,8 @@ var express = require('express'),
     request = require('request'),
     json = require('json'),
     unirest = require('unirest'),
-    client = require('twilio')('AC3ae44eef70072c95f5d52e57d39df1bc', 'dcd95a9a35f303ac6da486d994e130de');
+    client = require('twilio')(process.env.TWILIO_KEY, process.env.TWILIO_SECRET);
 
-var twilio_number = '+16476910676';
 app.set('port', (process.env.PORT || 5000));
 
 app.get('/', function(req, res) {
@@ -31,7 +30,7 @@ app.get('/sms/reply/*', function(req, res) {
 	    'Content-Type':'text/xml'
 	});
 	if(body_message_parts[0].toLowerCase() == 'help') {
-		var reply = "For directions, enter data in the format \"Directions from (Enter origin) to (Enter destination)\" \nFor Places, enter data in the format \"(type of) Places near (your location) with keyword (keyword)\" \nFor Weather, enter data in the format \"Weather at (name of city) (name of province/state/country)\" \nFor Stocks, enter data in the format \"Stock (4 letter stock name)\" \nFor news, enter data in the format \"News (number of articles/search) (number of articles to search) (search keyword)\" \nFor dictionary definitions of words, enter data in the format \"Define (your word)\" \n";
+		var reply = "For directions, enter data in the format \"Directions from (Enter origin) to (Enter destination)\" \n\nFor Places, enter data in the format \"(type of) Places near (your location) with keyword (keyword)\" \n\nFor Weather, enter data in the format \"Weather at (name of city) (name of province/state/country)\" \n\nFor Stocks, enter data in the format \"Stock (4 letter stock name)\" \n\nFor news, enter data in the format \"News (number of articles/search) (number of articles to search) (search keyword)\" \n\nFor dictionary definitions of words, enter data in the format \"Define (your word)\" \n";
 		var resp = "<Response><Message>" + reply + "</Message></Response>";
 		res.end(resp);
 	}
@@ -150,6 +149,12 @@ app.get('/sms/reply/*', function(req, res) {
  	}
 	else if (body_message_parts[0].toLowerCase() == 'stock') {
 		//console.log('Stocks');	
+		if(body_message_parts.length != 2) {
+			resp = "<Response><Message>Incorrect usage, please try: Stock &lt;stock_name&gt;</Message></Response>";
+			res.end(resp);	
+		}
+		else
+		{
 		var name = body_message_parts[1];
 		var reply = '';
 		var resp;
@@ -170,7 +175,7 @@ app.get('/sms/reply/*', function(req, res) {
 					'Close           : ' + result.body[0]['close'] + '\n';
 			resp = "<Response><Message>" + reply + "</Message></Response>";
 				res.end(resp);
-		});
+		});}
 	}
 	else if (body_message_parts.indexOf('places') == 1) { //_____ places near ______ with keyword ______
 		//console.log('Places');
@@ -280,7 +285,7 @@ app.get('/sms/reply/*', function(req, res) {
 		}
 	}
 	else {
-		var resp = "<Response><Message>Command '" + body_message +"' not found</Message></Response>";
+		var resp = "<Response><Message>Command '" + body_message +"' not found. Type 'Help me' for help.</Message></Response>";
 		res.end(resp);
 	}
 });
