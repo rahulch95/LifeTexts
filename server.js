@@ -8,7 +8,6 @@ var express = require('express'),
     unirest = require('unirest'),
     client = require('twilio')(process.env.TWILIO_KEY, process.env.TWILIO_SECRET);
 
-var twilio_number = '+16476910676';
 app.set('port', (process.env.PORT || 5000));
 
 app.get('/', function(req, res) {
