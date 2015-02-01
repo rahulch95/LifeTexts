@@ -30,7 +30,7 @@ app.get('/sms/reply/*', function(req, res) {
 	    'Content-Type':'text/xml'
 	});
 	if(body_message_parts[0].toLowerCase() == 'help') {
-		var reply = "For directions, enter data in the format \"Directions from (Enter origin) to (Enter destination)\" \n\nFor Places, enter data in the format \"(type of) Places near (your location) with keyword (keyword)\" \n\nFor Weather, enter data in the format \"Weather at (name of city) (name of province/state/country)\" \n\nFor Stocks, enter data in the format \"Stock (4 letter stock name)\" \n\nFor news, enter data in the format \"News (number of articles/search) (number of articles to search) (search keyword)\" \n\nFor dictionary definitions of words, enter data in the format \"Define (your word)\" \n";
+		var reply = "For Directions, enter data in the format \"Directions from (Enter origin) to (Enter destination)\" \n\nFor Places, enter data in the format \"(type of) Places near (your location) with keyword (keyword)\" \n\nFor Weather, enter data in the format \"Weather at (name of city) (name of province/state/country)\" \n\nFor Stocks, enter data in the format \"Stock (4 letter stock name)\" \n\nFor News, enter data in the format \"News (number of articles/search) (number of articles to search) (search keyword)\" \n\nFor Dictionary definitions of words, enter data in the format \"Define (your word)\" \n";
 		var resp = "<Response><Message>" + reply + "</Message></Response>";
 		res.end(resp);
 	}
