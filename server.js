@@ -7,7 +7,7 @@ var express = require('express'),
     json = require('json'),
     unirest = require('unirest'),
     client = require('twilio')(process.env.TWILIO_KEY, process.env.TWILIO_SECRET);
-
+//process.env.TWILIO_KEY, process.env.TWILIO_SECRET
 app.set('port', (process.env.PORT || 5000));
 
 app.get('/', function(req, res) {
@@ -218,12 +218,12 @@ app.get('/sms/reply/*', function(req, res) {
 						res.end(resp);	
 					}
 					else {
+						console.log(placeparse);
 						var number = Math.min(3, placeparse['results'].length);
 						//console.log('The minimum is' + number);
 						for(var i = 0; i < number; i++) {
 							reply = reply + (i+1) + '. \n' + 'Name      : ' + placeparse['results'][i]['name']+'\n'+
-							'Location       : ' + placeparse['results'][i]['vicinity'] + '\n' +
-							'Open now?      : ' + placeparse['results'][i]['opening_hours']['open_now'] + '\n' + 							'Price level    : ' + placeparse['results'][i]['price_level'] + '\n';
+							'Location       : ' + placeparse['results'][i]['vicinity'] + '\n';
 						}
 					resp = "<Response><Message>" + reply + "</Message></Response>";
 					res.end(resp);	
