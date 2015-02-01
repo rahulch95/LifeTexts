@@ -54,7 +54,7 @@ app.get('/sms/reply/*', function(req, res) {
 	    'Content-Type':'text/xml'
 	});
 	if(str(body_message).startsWith('directions') || str(body_message).startsWith('Directions')) {
-		console.log('directions');
+		//console.log('directions');
 		var end_from_index = 3;
 		for (var i = 2; i < body_message_parts.length; i++) {
 			if (body_message_parts[i] == 'to') {
@@ -79,7 +79,7 @@ app.get('/sms/reply/*', function(req, res) {
 		
 	}
 	else if(body_message_parts[0].toLowerCase() == 'weather') {
-        console.log('Weather');		
+       // console.log('Weather');		
         console.log(body_message_parts);
         var cityname = body_message_parts[2];
 		var cityloc = body_message_parts[3];
@@ -103,7 +103,7 @@ app.get('/sms/reply/*', function(req, res) {
 			});
 	}
 	else if (str(body_message.toLowerCase()).startsWith('define')) {  
-		console.log('Definition');
+		//console.log('Definition');
 		var resp = '';
 		var reply = '';
 		var word = body_message_parts[1];
@@ -120,20 +120,86 @@ app.get('/sms/reply/*', function(req, res) {
 				res.end(resp);
 			});
  	}
-	else if (body_message_parts[0].toLowerCase() == 'nearby') {
-		console.log('Nearby');
-		var resp = '';
-		var reply;
-		var type = body_message_parts[1];
-		var keyword = body_message_parts[2];
-		request('https://maps.googleapis.com/maps/api/place/radarsearch/json?location=48.859294,2.347589&radius=5000&types=' + 
-type + '&keyword=' + keyword + 'key=AIzaSyDHqRqXuIj53W3n7_228jExe4ImVUkIVLo',
+	else if (body_message_parts[0].toLowerCase() == 'stock') {
+		//console.log('Stocks');	
+		var name = body_message_parts[1];
+		var reply = '';
+		var resp;
+		unirest.get('https://www.enclout.com/api/yahoo_finance/show?auth_token=uXYQUj9KLBFrXqbqq4L7&text='+name.toUpperCase())
+		.header("X-Mashape-Key", "KamTtH7Q0ymshVl5xPDnbiSWKBbpp1Reh2TjsnM36vK1b3W5jE")
+		.header("Accept", "application/json")
+		.end(function (result) {
+  			reply = reply + 'Name            : ' + result.body[0]['symbol'] + '\n' + 
+					'Ask             : ' + result.body[0]['ask'] + '\n' +
+					'Bid             : ' + result.body[0]['bid'] + '\n' +
+					'Last trade date : ' + result.body[0]['last_trade_date'] + '\n' +
+					'Low             : ' + result.body[0]['low'] + '\n' +
+					'High            : ' + result.body[0]['high'] + '\n' +
+					'Low 52 Weeks    : ' + result.body[0]['low_52_weeks'] + '\n' +
+					'High 52 Weeks   : ' + result.body[0]['high_52_weeks'] + '\n' +
+					'Volume          : ' + result.body[0]['volume'] + '\n' +
+					'Open            : ' + result.body[0]['open'] + '\n' +	
+					'Close           : ' + result.body[0]['close'] + '\n';
+			resp = "<Response><Message>" + reply + "</Message></Response>";
+				res.end(resp);
+		});
+	}
+	else if (body_message_parts[1].toLowerCase() == 'places') { //_____ places near ______ with keyword ______
+		//console.log('Places');
+		var type = body_message_parts[0];
+		var index1, index2;
+		var reply = '';
+		var resp;
+		for(var i = 1; i < body_message_parts.length; i++) {
+			if(body_message_parts[i] == 'near') 
+				index1 = i;
+			if(body_message_parts[i] == 'with')
+				index2 = i;		
+		} 
+		var address = body_message_parts.slice(index1 + 1, index2);
+		var keyword = body_message_parts.slice(index2 + 2);
+		var lat;
+		var long;
+		//console.log(address);
+		request('https://maps.googleapis.com/maps/api/geocode/json?address=' + address, 
 			function(err, res_req, body) {
-				console.log(body);	
+				//console.log(body);
+				var toparse = JSON.parse(body);
+				lat = toparse['results'][0]['geometry']['location']['lat'];
+				long = toparse['results'][0]['geometry']['location']['lng'];
+				//console.log(lat, long);
+				request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + lat + ',' + long + 					'&radius=1000&types=' + type + '&keyword=' + keyword + '&key=AIzaSyDewm58QznqMn6M4Bc8Lg1kyV3OjyN61F0', 
+				function(err, res_req, body) {
+					//console.log(body);
+					var placeparse = JSON.parse(body);
+					var number = Math.min(3, placeparse['results'].length);
+					//console.log('The minimum is' + number);
+					for(var i = 0; i < number; i++) {
+						reply = reply + (i+1) + '. \n' + 'Name      : ' + placeparse['results'][i]['name']+'\n'+
+						'Location       : ' + placeparse['results'][i]['vicinity'] + '\n' +
+						'Open now?      : ' + placeparse['results'][i]['opening_hours']['open_now'] + '\n' + 							'Price level    : ' + placeparse['results'][i]['price_level'] + '\n';
+					}
+				resp = "<Response><Message>" + reply + "</Message></Response>";
+				res.end(resp);	
+				});
+			});
+	}
+	else if(body_message_parts[0].toLowerCase() == 'news') {
+		var top_count = parseInt(body_message_parts[1]);
+		var resp = '';
+		request('http://api.nytimes.com/svc/topstories/v1/home.json?api-key=7b58b7fc2899c1590247b5fdad94f5c6:0:71138579',
+			function(err, res_req, body) {
+				var top_stories_json = JSON.parse(body);
+				var stories = top_stories_json['results'];
+				//console.log(stories);
+				var reply = '';
+				for (var i = 0; i < top_count; i++) {
+					reply += i+1 + '. ' + stories[i]['title'].split('\u2019').join("'") +  '\n' + stories[i]['abstract'].split('\u2019').join("'") + '\n';
+				}
 				resp = "<Response><Message>" + reply + "</Message></Response>";
 			    res.end(resp);
-			});
-			
+			}
+		);
 	}
 	else {
 		var resp = "<Response><Message>" + body_message +"</Message></Response>";
