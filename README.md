@@ -10,7 +10,7 @@ Don't forget the +1, it's important.
 (This will stop working at some point because we might run out of Twilio Credit)
 Type 'help me' if you don't know the commands.
 
-Type 'directions from address1&gt; to &lt;address2&gt; &lt;mode&gt;' for directions, mode can be walking, driving or transit.
+Type 'directions from &lt;address1&gt; to &lt;address2&gt; &lt;mode&gt;' for directions, mode can be walking, driving or transit.
 
 Type 'stock &lt;stock code&gt;', for stock price.
 
