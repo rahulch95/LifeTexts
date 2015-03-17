@@ -40,27 +40,27 @@ Help Me
 
 Directions for Driving
 
-![alt tag](https://raw.github.com/rahulch95/LifeTexts/gh-pages/gifs/directions_driving.gif)
+![alt tag](https://lifetexts.herokuapp.com/gifs/directions_driving.gif)
 
 Directions for Transit
 
-![alt tag](https://raw.github.com/rahulch95/LifeTexts/gh-pages/gifs/directions_transit.gif)
+![alt tag](https://lifetexts.herokuapp.com/gifs/directions_transit.gif)
 
 Places for food
 
-![alt tag](https://raw.github.com/rahulch95/LifeTexts/gh-pages/gifs/food_places.gif)
+![alt tag](https://lifetexts.herokuapp.com/gifs/food_places.gif)
 
 News 
 
-![alt tag](https://raw.github.com/rahulch95/LifeTexts/gh-pages/gifs/news_1.gif)
+![alt tag](https://lifetexts.herokuapp.com/gifs/news_1.gif)
 
 News Search
 
-![alt tag](https://raw.github.com/rahulch95/LifeTexts/gh-pages/gifs/news_search.gif)
+![alt tag](https://lifetexts.herokuapp.com/gifs/news_search.gif)
 
 Weather
 
-![alt tag](https://raw.github.com/rahulch95/LifeTexts/gh-pages/gifs/weather.gif)
+![alt tag](https://lifetexts.herokuapp.com/gifs/weather.gif)
 
 Dictionary definitions
 
