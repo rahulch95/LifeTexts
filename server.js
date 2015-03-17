@@ -8,6 +8,8 @@ var express = require('express'),
     unirest = require('unirest'),
     client = require('twilio')(process.env.TWILIO_KEY, process.env.TWILIO_SECRET);
 
+app.use(express.static(__dirname + '/public'));
+
 // set port to heroku's defined port if it exists or make it port 5000 by default
 app.set('port', (process.env.PORT || 5000));
 
