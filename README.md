@@ -10,19 +10,19 @@ Don't forget the +1, it's important.
 (This will stop working at some point because we might run out of Twilio Credit)
 Type 'help me' if you don't know the commands.
 
-Type 'directions from <address1> to <address2> <mode>' for directions, mode can be walking, driving or transit.
+Type 'directions from address1&gt; to &lt;address2&gt; &lt;mode&gt;' for directions, mode can be walking, driving or transit.
 
-Type 'stock <stock code>', for stock price.
+Type 'stock &lt;stock code&gt;', for stock price.
 
-Type 'weather <city-name> <state/country>' for weather.
+Type 'weather &lt;city-name&gt; &lt;state/country&gt;' for weather.
 
-Type '<type of place> places near <location> with keyword <keyword>', for nearby places. 
+Type '&lt;type of place&gt; places near &lt;location&gt; with keyword &lt;keyword&gt;', for nearby places. 
 
-Type 'define <your word>' for definition of the word.
+Type 'define &lt;your word&gt;' for definition of the word.
 
-Type 'news <number of stories>' to get the top n stories.
+Type 'news &lt;number of stories&gt;' to get the top n stories.
 
-Type 'news search <number of stories> <search word>' to get the top n stories about search.
+Type 'news search &lt;number of stories&gt; &lt;search word&gt;' to get the top n stories about search.
 ## Can I set up my own LifeTexts?
 1. Sure you can. Just download a zip of this folder including the package.json file.
 2. Then command line into the directory of the folder and run npm init (after installing Node.js of course).
