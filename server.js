@@ -7,9 +7,11 @@ var express = require('express'),
     json = require('json'),
     unirest = require('unirest'),
     client = require('twilio')(process.env.TWILIO_KEY, process.env.TWILIO_SECRET);
-//process.env.TWILIO_KEY, process.env.TWILIO_SECRET
+
+// set port to heroku's defined port if it exists or make it port 5000 by default
 app.set('port', (process.env.PORT || 5000));
 
+// if lifetexts.herokuapp.com/ is accessed just type hi
 app.get('/', function(req, res) {
 	 
 	 res.writeHead(200, {"Content-Type" : "text/html"});
@@ -17,23 +19,39 @@ app.get('/', function(req, res) {
 	 res.end();
 });
 
+// if lifetexts.herokuapp.com/ is accessed then return a TwiML (Twilio XML) document
 app.get('/sms/reply/*', function(req, res) {
-	//console.log(req.query);
+
+	// set default value of body_message to "could not find body"
 	var body_message = "could not find body";
+
+	// if body does exist then change body_message to the given body
 	if (req.query.Body) {
 		body_message = req.query.Body;
 	}
+
+	// body_message_parts is a list of all words
 	var body_message_parts = body_message.split(" ");
 
 	//Render the TwiML document using "toString"
 	res.writeHead(200, {
 	    'Content-Type':'text/xml'
 	});
+
+	// if body_message_parts starts with help, return instructions as the TwiML document
 	if(body_message_parts[0].toLowerCase() == 'help') {
-		var reply = "For Directions, enter data in the format \"Directions from (Enter origin) to (Enter destination)\" \n\nFor Places, enter data in the format \"(type of) Places near (your location) with keyword (keyword)\" \n\nFor Weather, enter data in the format \"Weather at (name of city) (name of province/state/country)\" \n\nFor Stocks, enter data in the format \"Stock (4 letter stock name)\" \n\nFor News, enter data in the format \"News (number of articles/search) (number of articles to search) (search keyword)\" \n\nFor Dictionary definitions of words, enter data in the format \"Define (your word)\" \n";
+		var reply = ("For Directions, enter data in the format \"Directions from (Enter origin) to (Enter destination)\" \n" + 
+					"\nFor Places, enter data in the format \"(type of) Places near (your location) with keyword (keyword)\" \n" + 
+					"\nFor Weather, enter data in the format \"Weather at (name of city) (name of province/state/country)\" \n" + 
+					"\nFor Stocks, enter data in the format \"Stock (4 letter stock name)\" \n" + 
+					"\nFor News, enter data in the format \"News (number of articles/search) (number of articles to search) (search keyword)\" \n" + 
+					"\nFor Dictionary definitions of words, enter data in the format \"Define (your word)\" \n");
 		var resp = "<Response><Message>" + reply + "</Message></Response>";
 		res.end(resp);
 	}
+
+	// if body of the message starts with directions then we use the google directions API after finding the origin and the destination
+	// we assume that the format of the message will be "directions from <origin address> to <destination address> [optional - mode of transport]"
 	else if(str(body_message_parts[0]).toLowerCase() == 'directions') {
 		if (body_message_parts[1] != 'from' ||
 			body_message.toLowerCase().indexOf('to') == -1 ||
@@ -43,30 +61,40 @@ app.get('/sms/reply/*', function(req, res) {
 			resp = "<Response><Message>Incorrect usage, please try: directions from &lt;address1&gt; to &lt;address2&gt;</Message></Response>";
 			res.end(resp);
 		}
-		//console.log('directions');
 
+		// set default mode of transport to transit
 		var end_from_index = 3;
 		var mode_of_transport = 'transit';
-		if (body_message_parts[body_message_parts.length - 1] == 'walking' ||
-			body_message_parts[body_message_parts.length - 1] == 'transit' ||
-			body_message_parts.indexOf('driving') != -1) {
-			mode_of_transport = body_message_parts[body_message_parts.length - 1];
-			body_message_parts = body_message_parts.slice(0,body_message_parts.length - 1);
+		
+		var num_of_words = body_message_parts.length - 1;
+
+		// if last word is walking/transit/driving set mode of transport to that mode and remove it from the list
+		if (body_message_parts[num_of_words].toLowerCase() == 'walking' ||
+			body_message_parts[num_of_words].toLowerCase() == 'transit' ||
+			body_message_parts[num_of_words].toLowerCase() == 'driving') {
+			
+			mode_of_transport = body_message_parts[num_of_words].toLowerCase();
+			body_message_parts = body_message_parts.slice(0,num_of_words);
 		}
-		console.log(body_message_parts);
+
+		
 		for (var i = 2; i < body_message_parts.length; i++) {
 			if (body_message_parts[i].toLowerCase() == 'to') {
 				end_from_index = i;
 				break;
 			};
 		};
+
+		// find the source address and the destination address using the indices we found above
 		from_place = body_message_parts.slice(2, end_from_index).join('+');
 		to_place = body_message_parts.slice(end_from_index + 1).join('+');
 
+		// request the directions from googleapis and parse the body into json format
 		var resp = '';
-		console.log('https://maps.googleapis.com/maps/api/directions/json?origin=' + from_place + '&destination=' + to_place + '&mode=' + mode_of_transport);
+		
 		request('https://maps.googleapis.com/maps/api/directions/json?origin=' + from_place + '&destination=' + to_place + '&mode=' + mode_of_transport,
 			function(err, res_req, body) {
+
 				var direction_json = JSON.parse(body);
 				if (direction_json['status'] == 'ZERO_RESULTS') {
 					resp = "<Response><Message>No directions found, change mode of transport and make sure you specify the right city.</Message></Response>";
@@ -79,33 +107,46 @@ app.get('/sms/reply/*', function(req, res) {
 					} 
 					else 
 					{
-						var steps = direction_json['routes'][0]['legs'][0]['steps'];
-						var reply = '';
-						for (var i = 0; i < steps.length; i++) {
-							reply += i+1 + '. ' + steps[i]['html_instructions'].split('<b>').join('').split('</b>').join('').split('\n').join('').split('<div style="font-size:0.9em">').join('') + " for " + steps[i]['duration']['text'] + ' (' + steps[i]['distance']['text'] + ')'+ '\n';
+						// making sure that these items exist in the json
+						if (direction_json['routes'] && direction_json['routes'].length >= 1 && direction_json['routes'][0]['legs'] && direction_json['routes'][0]['legs'].length >= 1 && direction_json['routes'][0]['legs'][0]['steps']) {
+
+							// find the steps needed to follow the directions and remove the unnecessary formatting and add it to the reply string
+							var steps = direction_json['routes'][0]['legs'][0]['steps'];
+							var reply = '';
+							for (var i = 0; i < steps.length; i++) {
+								reply += i+1 + '. ' + steps[i]['html_instructions'].split('<b>').join('').split('</b>').join('').split('\n').join('').split('<div style="font-size:0.9em">').join('') + " for " + steps[i]['duration']['text'] + ' (' + steps[i]['distance']['text'] + ')'+ '\n';
+							}	
+						}
+						else {
+							reply = "Oops something went wrong, try a more specific location";
 						}
 					}
+
+					// reply to the message with required string
 					resp = "<Response><Message>" + reply + "</Message></Response>";
 				    res.end(resp);
 				}
-			});
+			}
+		);
 		
-	} 
-		else if(body_message_parts[0].toLowerCase() == 'weather') {
+	}
+
+	// assuming that the form of request is "weather at <city> <state/country>"
+	else if(body_message_parts[0].toLowerCase() == 'weather') {
 		if (body_message_parts.length != 4) {
 				resp = "<Response><Message>Wrong syntax, Correct Usage: weather at &lt;cityname&gt; &lt;state/country &gt;</Message></Response>";
 				res.end(resp);
 		}
+
 		else {
-	        //console.log('Weather');		
-	        //console.log(body_message_parts);
+
 	        var cityname = body_message_parts[2];
 			var cityloc = body_message_parts[3];
 	        var resp = '';
-	        //console.log('http://api.openweathermap.org/data/2.5/weather?q=' + cityname + ',' + cityloc + '&units=metric');
+	        
 	        request('http://api.openweathermap.org/data/2.5/weather?q=' + cityname + ',' + cityloc + '&units=metric', 
 				function(err, res_req, body) {
-					//console.log('body of weather', body);
+
 					var weather_details = JSON.parse(body);
 					if (!weather_details['message']) {
 						var country = weather_details['sys']['country'];
@@ -135,6 +176,7 @@ app.get('/sms/reply/*', function(req, res) {
 			);
 		}
 	}
+
 	else if (str(body_message.toLowerCase()).startsWith('define')) {  
 		if (body_message_parts.length != 2) 
 		{
@@ -148,7 +190,7 @@ app.get('/sms/reply/*', function(req, res) {
 			var reply = '';
 			var word = body_message_parts[1];
 			unirest.get("https://montanaflynn-dictionary.p.mashape.com/define?word=" + word)
-				.header("X-Mashape-Key", "KamTtH7Q0ymshVl5xPDnbiSWKBbpp1Reh2TjsnM36vK1b3W5jE")
+				.header("X-Mashape-Key", process.env.MASHAPE_KEY_WORD_SEARCH)
 				.header("Accept", "application/json")
 				.end(function (result) {
 					//console.log('definition', result.body);
@@ -162,8 +204,9 @@ app.get('/sms/reply/*', function(req, res) {
 			);			
 		}
  	}
+
 	else if (body_message_parts[0].toLowerCase() == 'stock') {
-		//console.log('Stocks');	
+
 		if(body_message_parts.length != 2) {
 			resp = "<Response><Message>Incorrect usage, please try: Stock &lt;stock_name&gt;</Message></Response>";
 			res.end(resp);	
@@ -173,8 +216,8 @@ app.get('/sms/reply/*', function(req, res) {
 		var name = body_message_parts[1];
 		var reply = '';
 		var resp;
-		unirest.get('https://www.enclout.com/api/yahoo_finance/show?auth_token=uXYQUj9KLBFrXqbqq4L7&text='+name.toUpperCase())
-		.header("X-Mashape-Key", "KamTtH7Q0ymshVl5xPDnbiSWKBbpp1Reh2TjsnM36vK1b3W5jE")
+		unirest.get('https://www.enclout.com/api/yahoo_finance/show?' + process.env.MASHAPE_AUTH_TOKEN_YAHOO_FINANCE + name.toUpperCase())
+		.header("X-Mashape-Key", process.env.MASHAPE_KEY_YAHOO_FINANCE)
 		.header("Accept", "application/json")
 		.end(function (result) {
   			reply = reply + 'Name            : ' + result.body[0]['symbol'] + '\n' + 
@@ -208,15 +251,16 @@ app.get('/sms/reply/*', function(req, res) {
 		var keyword = body_message_parts.slice(index2 + 2);
 		var lat;
 		var lng;
-		//console.log(address);
+
 		request('https://maps.googleapis.com/maps/api/geocode/json?address=' + address, 
 			function(err, res_req, body) {
-				//console.log(body);
+
 				var toparse = JSON.parse(body);
 				lat = toparse['results'][0]['geometry']['location']['lat'];
 				lng = toparse['results'][0]['geometry']['location']['lng'];
-				//console.log(lat, long);
-				request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + lat + ',' + lng + '&radius=1000&types=' + type + '&keyword=' + keyword + '&key=AIzaSyDewm58QznqMn6M4Bc8Lg1kyV3OjyN61F0', 
+
+				request('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + lat + ',' + lng + '&radius=1000&types=' + type + '&keyword=' + keyword + '&key=' + process.env.GOOGLE_NEARBY_PLACES_KEY, 
+
 				function(err, res_req, body) {
 					//console.log(body);
 					var placeparse = JSON.parse(body);
@@ -242,7 +286,7 @@ app.get('/sms/reply/*', function(req, res) {
 		if(body_message_parts.length == 1) {
 			var resp = '';
 
-			request('http://api.nytimes.com/svc/topstories/v1/home.json?api-key=7b58b7fc2899c1590247b5fdad94f5c6:0:71138579',
+			request('http://api.nytimes.com/svc/topstories/v1/home.json?api-key=' + process.env.NYTIMES_KEY,
 				function(err, res_req, body) {
 					var top_stories_json = JSON.parse(body);
 					var stories = top_stories_json['results'];
@@ -261,7 +305,7 @@ app.get('/sms/reply/*', function(req, res) {
 			var top_count = parseInt(body_message_parts[1]);
 			var resp = '';
 
-			request('http://api.nytimes.com/svc/topstories/v1/home.json?api-key=7b58b7fc2899c1590247b5fdad94f5c6:0:71138579',
+			request('http://api.nytimes.com/svc/topstories/v1/home.json?api-key=' + process.env.NYTIMES_KEY,
 				function(err, res_req, body) {
 					var top_stories_json = JSON.parse(body);
 					var stories = top_stories_json['results'];
@@ -289,7 +333,7 @@ app.get('/sms/reply/*', function(req, res) {
 
 			var resp = '';
 
-			request('http://api.nytimes.com/svc/search/v2/articlesearch.json?q=' + search_term + '&fl=lead_paragraph,headline,pub_date&api-key=fdcac45a0d405a7487fbd422128cb413:0:71138579',
+			request('http://api.nytimes.com/svc/search/v2/articlesearch.json?q=' + search_term + '&fl=lead_paragraph,headline,pub_date&api-key=' + process.env.NYTIMES_KEY,
 				function(err, res_req, body) {
 					var results_json = JSON.parse(body);
 					var results = results_json['response']['docs'];

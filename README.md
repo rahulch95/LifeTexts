@@ -7,7 +7,7 @@ If you get lost, need to check up on your stocks, want to know the weather out t
 Just shoot a text to:
 ## +1(647)691-0707
 Don't forget the +1, it's important.
-
+(This will stop working at some point because we might run out of Twilio Credit)
 Type 'help me' if you don't know the commands.
 
 Type 'directions from <address1> to <address2> <mode>' for directions, mode can be walking, driving or transit.
@@ -23,41 +23,48 @@ Type 'define <your word>' for definition of the word.
 Type 'news <number of stories>' to get the top n stories.
 
 Type 'news search <number of stories> <search word>' to get the top n stories about search.
+## Can I set up my own LifeTexts?
+1. Sure you can. Just download a zip of this folder including the package.json file.
+2. The command line into the directory of the folder and run npm init (after installing Node.js) of course.
+3. Host the server online after setting up your own API keys from Twilio, Mashape, New York Times and Yahoo Finances in server.js (instead of the current process.env keys).
+4. Set up your twilio number to send a request to your server.
+5. Send a text to your twilio number.
+6. Receive a reply.
 ## Can I see it working before I start using it?
 Sure here is how it goes:
 
-1. Help Me
+Help Me
 
 ![alt tag](https://raw.github.com/rahulch95/LifeTexts/gh-pages/gifs/help_me.gif)
 
-2. Directions for Driving
+Directions for Driving
 
 ![alt tag](https://raw.github.com/rahulch95/LifeTexts/gh-pages/gifs/directions_driving.gif)
 
-3. Directions for Transit
+Directions for Transit
 
 ![alt tag](https://raw.github.com/rahulch95/LifeTexts/gh-pages/gifs/directions_transit.gif)
 
-4. Places for food
+Places for food
 
 ![alt tag](https://raw.github.com/rahulch95/LifeTexts/gh-pages/gifs/food_places.gif)
 
-5. News 
+News 
 
 ![alt tag](https://raw.github.com/rahulch95/LifeTexts/gh-pages/gifs/news_1.gif)
 
-6. News Search
+News Search
 
 ![alt tag](https://raw.github.com/rahulch95/LifeTexts/gh-pages/gifs/news_search.gif)
 
-7. Weather
+Weather
 
 ![alt tag](https://raw.github.com/rahulch95/LifeTexts/gh-pages/gifs/weather.gif)
 
-8. Dictionary definitions
+Dictionary definitions
 
 ![alt tag](https://raw.github.com/rahulch95/LifeTexts/gh-pages/gifs/define.gif)
 
-9. Stock Update
+Stock Update
 
 ![alt tag](https://raw.github.com/rahulch95/LifeTexts/gh-pages/gifs/stocks.gif)

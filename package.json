@@ -10,6 +10,15 @@
     "type": "git",
     "url": "https://github.com/rahulch95/LifeTexts.git"
   },
+  "dependencies" : { 
+  "express" : "latest"
+  , "http" : "latest"
+  , "twilio" : "latest"
+  , "request" : "latest"
+  , "unirest" : "latest"
+  , "json" : "latest"
+  , "string" : "latest"
+  }, 
   "keywords": [
     "texts",
     "twilio",
