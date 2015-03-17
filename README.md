@@ -25,7 +25,7 @@ Type 'news <number of stories>' to get the top n stories.
 Type 'news search <number of stories> <search word>' to get the top n stories about search.
 ## Can I set up my own LifeTexts?
 1. Sure you can. Just download a zip of this folder including the package.json file.
-2. The command line into the directory of the folder and run npm init (after installing Node.js) of course.
+2. Then command line into the directory of the folder and run npm init (after installing Node.js of course).
 3. Host the server online after setting up your own API keys from Twilio, Mashape, New York Times and Yahoo Finances in server.js (instead of the current process.env keys).
 4. Set up your twilio number to send a request to your server.
 5. Send a text to your twilio number.
