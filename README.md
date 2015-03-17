@@ -30,6 +30,7 @@ Type 'news search <number of stories> <search word>' to get the top n stories ab
 4. Set up your twilio number to send a request to your server.
 5. Send a text to your twilio number.
 6. Receive a reply.
+
 ## Can I see it working before I start using it?
 Sure here is how it goes:
 
