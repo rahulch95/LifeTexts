@@ -146,7 +146,7 @@ app.get('/sms/reply/*', function(req, res) {
 			var cityloc = body_message_parts[3];
 	        var resp = '';
 	        
-	        request('http://api.openweathermap.org/data/2.5/weather?q=' + cityname + ',' + cityloc + '&units=metric', 
+	        request('http://api.openweathermap.org/data/2.5/weather?q=' + cityname + ',' + cityloc + '&units=metric&appid=' + process.env.WEATHER_API, 
 				function(err, res_req, body) {
 
 					var weather_details = JSON.parse(body);
