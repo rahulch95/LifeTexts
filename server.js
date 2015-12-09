@@ -13,12 +13,10 @@ app.use(express.static(__dirname + '/public'));
 // set port to heroku's defined port if it exists or make it port 5000 by default
 app.set('port', (process.env.PORT || 5000));
 
-// if lifetexts.herokuapp.com/ is accessed just type hi
+app.use(express.static(__dirname));
+
 app.get('/', function(req, res) {
-	 
-	 res.writeHead(200, {"Content-Type" : "text/html"});
-	 res.write("<body>Hi</body>");
-	 res.end();
+	 res.sendFile('index.html', { root: __dirname });
 });
 
 // if lifetexts.herokuapp.com/ is accessed then return a TwiML (Twilio XML) document
